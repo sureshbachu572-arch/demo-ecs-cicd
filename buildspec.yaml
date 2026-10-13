@@ -1,0 +1,37 @@
+version: 02
+
+phases:
+  pre_build:
+    commands:
+      - mvn clean install
+      - echo logging in to Amazon EcR
+      - aws --version
+      - REPOSITORY_URI=006350471548.dkr.ecr.ap-south-2.amazonaws.com/demo-ecs-cicd
+      - aws ecr get-login-password  --region us-east-2 | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=build-$(echo $ODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+  build:
+    commands:
+      - echo build started on 'date'
+      - echo building docker image..
+      - docker build -t $REPOSITORY_URI:latest
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo build completed on date
+      - echo pushing the docker image
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo writing image definitions file..
+      - printf '[{"name":"course-service","imageUri":"%s" }]' $REPOSITORY_URI:$IMAGE_TAG >
+      - echo writing image definitions file..
+      # add your container name
+      - DOCKER_CONTAINER_NAME=
+      - printf '[{"name":"%s","imageUri":"%s"}]' $DOCKER_CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG
+      - echo $DOCKER_CONTAINER_NAME
+      - echo printing imagedefinitions.json
+      - cat imagedefinitons.json
+artifacts:
+  files:
+    - imagedefinitions.json
+    - target/demo-ecs-cicd-0.0.1-SNAPSHOT.jar
