@@ -9,7 +9,7 @@ phases:
       - REPOSITORY_URI=006350471548.dkr.ecr.ap-south-2.amazonaws.com/demo-ecs-cicd
       - aws ecr get-login-password  --region us-east-2 | docker login --username AWS --password-stdin $REPOSITORY_URI
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG=build-$(echo $ODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
   build:
     commands:
       - echo build started on 'date'
@@ -25,8 +25,8 @@ phases:
       - echo writing image definitions file..
       - printf '[{"name":"course-service","imageUri":"%s" }]' $REPOSITORY_URI:$IMAGE_TAG >
       - echo writing image definitions file..
-      # add your container name
-      - DOCKER_CONTAINER_NAME=
+      # add your container name demo-ecs-cicd
+      - DOCKER_CONTAINER_NAME=demo-ecs-cicd
       - printf '[{"name":"%s","imageUri":"%s"}]' $DOCKER_CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG
       - echo $DOCKER_CONTAINER_NAME
       - echo printing imagedefinitions.json
